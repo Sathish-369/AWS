@@ -1,0 +1,15 @@
+Step 1: mkdir onboarding
+Step 2: cd onboarding/
+Step 3: vim dockerfile
+
+		FROM ubuntu:xx.xx
+		MAINTAINER ell.marquez
+		RUN apt-get update
+		RUN apt-get install -y pythonx
+
+step 4: docker build .
+output 
+	 ---> 80e27f4c264d
+			Successfully built 80e27f4c264d
+			
+Step 5: docker images
