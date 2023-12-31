@@ -1,0 +1,93 @@
+
+Scenario:
+If you disabled an AMI (Amazon Machine Image) in AWS instead of deregistering it, you may encounter issues when trying to delete the associated snapshot.
+
+Steps:
+
+1. **Identify Disabled AMI:**
+   - If you disabled an AMI and it's not visible in the GUI AMIs page, you won't be able to delete the snapshot from the AWS Management Console.
+
+2. **Use AWS CLI (CloudShell):**
+   - Open AWS CloudShell from the AWS Management Console by searching for "CloudShell" and launching it. This opens a command-line interface.
+
+3. **Run Command to Describe the Image:**
+   - Use the following command, replacing `ami-xxxxxxxxxxxxxxxx49ed5` with the actual AMI ID obtained from the snapshot page.
+     ```bash
+     aws ec2 describe-images --image-ids ami-xxxxxxxxxxxxxxxx49ed5
+     ```
+-----command output--------------
+$ aws ec2 describe-images --image-ids ami-xxxxxxxxxxx9ed5
+{
+    "Images": [
+        {
+            "Architecture": "x86_64",
+            "CreationDate": "xxxxxxxxxxxxxxxxx",
+            "ImageId": "ami-xxxxxxxxxxxxxxxxed5",
+            "ImageLocation": "xxxxxxxxxx129/demo image1",
+            "ImageType": "machine",
+            "Public": false,
+            "OwnerId": "xxxxxxxxxxxxxxxx",
+            "PlatformDetails": "Linux/UNIX",
+            "UsageOperation": "RunInstances",
+            "State": "disabled",
+            "BlockDeviceMappings": [
+                {
+                    "DeviceName": "/dev/sda1",
+                    "Ebs": {
+                        "DeleteOnTermination": true,
+                        "SnapshotId": "snap-xxxxxxxxxxxx5b0a1",
+                        "VolumeSize": 8,
+                        "VolumeType": "gp2",
+                        "Encrypted": false
+                    }
+                },
+                {
+                    "DeviceName": "/dev/sdb",
+                    "VirtualName": "ephemeral0"
+                },
+                {
+                    "DeviceName": "/dev/sdc",
+                    "VirtualName": "ephemeral1"
+                }
+            ],
+            "EnaSupport": true,
+            "Hypervisor": "xen",
+            "Name": "demo image1",
+            "RootDeviceName": "/dev/sda1",
+            "RootDeviceType": "ebs",
+            "SriovNetSupport": "simple",
+            "VirtualizationType": "hvm",
+            "SourceInstanceId": "i-xxxxxxxxxxxx9842c"
+        }
+    ]
+
+---------------------------------------------------------
+
+
+4. **Check Image Description:**
+   - If the image description includes `"State": "disabled"`, proceed to deregister the AMI.
+
+5. **Deregister Disabled AMI:**
+   - Run the following command, replacing `ami-xxxxxxxxxxxxxxxx49ed5` with the actual AMI ID.
+     ```bash
+     aws ec2 deregister-image --image-id ami-xxxxxxxxxxxxxxxx49ed5
+     ```
+
+6. **Confirm Deregistration:**
+   - Check the status of the AMI using the describe-images command. The State should be "deregistered" or not present:
+     ```bash
+     aws ec2 describe-images --image-ids ami-xxxxxxxxxxxxxxxx49ed5
+     ```
+
+7. **Delete Associated Snapshot:**
+   - Finally, you can delete the associated snapshot using its ID. Replace `snap-xxxxxxxxxxxx5b0a1` with the actual snapshot ID.
+     ```bash
+     aws ec2 delete-snapshot --snapshot-id snap-xxxxxxxxxxxx5b0a1
+     ```
+
+8. **Verify Deletion:**
+   - Confirm that the AMI is no longer listed in describe-images, and the snapshot is deleted.
+
+Now, you should be able to delete the snapshot from the AWS GUI or through the console without encountering errors. 
+
+Verify that your AMI and snapshot pages are empty and correctly reflect the changes.
